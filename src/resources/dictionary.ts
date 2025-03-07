@@ -257,6 +257,17 @@ const chinaExam: DictionaryResource[] = [
     languageCategory: 'en',
   },
   {
+    id: 'self-study_English00012',
+    name: '自考英语一完整单词',
+    description: '00012自考英语一完整单词书',
+    category: '中国考试',
+    tags: ['自考英语一'],
+    url: '/dicts/self-study_English00012.json',
+    length: 3503,
+    language: 'en',
+    languageCategory: 'en',
+  },
+  {
     id: 'self-study_English1',
     name: '自考1800高频单词',
     description: '自考1800高频单词',
