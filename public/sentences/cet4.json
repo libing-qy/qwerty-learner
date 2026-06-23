@@ -1,0 +1,18 @@
+[
+  {
+    "id": "cet4-0-0",
+    "text": "cancel the plan",
+    "tokens": ["cancel", "the", "plan"],
+    "trans": "取消计划",
+    "chapter": 0,
+    "sourceDictId": "cet4"
+  },
+  {
+    "id": "cet4-0-1",
+    "text": "the audience remained silent",
+    "tokens": ["the", "audience", "remained", "silent"],
+    "trans": "观众保持安静",
+    "chapter": 0,
+    "sourceDictId": "cet4"
+  }
+]
