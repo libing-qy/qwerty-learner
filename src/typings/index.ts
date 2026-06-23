@@ -32,6 +32,24 @@ export type WordWithIndex = Word & {
   index: number
 }
 
+export type TrainingMode = 'word' | 'sentence-order'
+
+export type SentenceItem = {
+  id: string
+  text: string
+  tokens: string[]
+  trans: string
+  chapter: number
+  sourceDictId: string
+}
+
+export type SentenceInputLog = {
+  index: number
+  correctCount: number
+  wrongCount: number
+  wrongTokens: string[]
+}
+
 export type InfoPanelType = 'donate' | 'vsc' | 'community' | 'redBook'
 
 export type InfoPanelState = {

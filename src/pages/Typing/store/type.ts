@@ -1,4 +1,4 @@
-import type { WordWithIndex } from '@/typings'
+import type { SentenceInputLog, SentenceItem, TrainingMode, WordWithIndex } from '@/typings'
 import type { LetterMistakes } from '@/utils/db/record'
 
 export type ChapterData = {
@@ -41,9 +41,22 @@ export type WrongWordData = {
   }>
 }
 
+export type SentenceData = {
+  sentences: SentenceItem[]
+  index: number
+  tokenIndex: number
+  inputToken: string
+  sentenceCount: number
+  correctCount: number
+  wrongCount: number
+  userInputLogs: SentenceInputLog[]
+}
+
 export type TypingState = {
   chapterData: ChapterData
+  sentenceData: SentenceData
   timerData: TimerData
+  trainingMode: TrainingMode
   isTyping: boolean
   isFinished: boolean
   isShowSkip: boolean

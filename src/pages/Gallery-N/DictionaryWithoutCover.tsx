@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import useIntersectionObserver from '@/hooks/useIntersectionObserver'
 import { currentDictIdAtom } from '@/store'
 import type { Dictionary } from '@/typings'
-import { calcChapterCount } from '@/utils'
+import { calcChapterCount } from '@/utils/calcChapterCount'
 import * as Progress from '@radix-ui/react-progress'
 import { useAtomValue } from 'jotai'
 import { useMemo, useRef } from 'react'

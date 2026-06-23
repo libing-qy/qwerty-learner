@@ -1,10 +1,21 @@
-import type { TypingState, UserInputLog } from './type'
+import type { SentenceData, TypingState, UserInputLog } from './type'
 import type { WordWithIndex } from '@/typings'
 import type { LetterMistakes } from '@/utils/db/record'
 import '@/utils/db/review-record'
 import { mergeLetterMistake } from '@/utils/db/utils'
 import shuffle from '@/utils/shuffle'
 import { createContext } from 'react'
+
+export const initialSentenceData: SentenceData = {
+  sentences: [],
+  index: 0,
+  tokenIndex: 0,
+  inputToken: '',
+  sentenceCount: 0,
+  correctCount: 0,
+  wrongCount: 0,
+  userInputLogs: [],
+}
 
 export const initialState: TypingState = {
   chapterData: {
@@ -16,11 +27,13 @@ export const initialState: TypingState = {
     wordRecordIds: [],
     userInputLogs: [],
   },
+  sentenceData: structuredClone(initialSentenceData),
   timerData: {
     time: 0,
     accuracy: 0,
     wpm: 0,
   },
+  trainingMode: 'word',
   isTyping: false,
   isFinished: false,
   isShowSkip: false,
@@ -38,6 +51,7 @@ export const initialUserInputLog: UserInputLog = {
 
 export enum TypingStateActionType {
   SETUP_CHAPTER = 'SETUP_CHAPTER',
+  SWITCH_TO_SENTENCE_MODE = 'SWITCH_TO_SENTENCE_MODE',
   SET_IS_SKIP = 'SET_IS_SKIP',
   SET_IS_TYPING = 'SET_IS_TYPING',
   TOGGLE_IS_TYPING = 'TOGGLE_IS_TYPING',
@@ -63,6 +77,7 @@ export enum TypingStateActionType {
 
 export type TypingStateAction =
   | { type: TypingStateActionType.SETUP_CHAPTER; payload: { words: WordWithIndex[]; shouldShuffle: boolean; initialIndex?: number } }
+  | { type: TypingStateActionType.SWITCH_TO_SENTENCE_MODE }
   | { type: TypingStateActionType.SET_IS_SKIP; payload: boolean }
   | { type: TypingStateActionType.SET_IS_TYPING; payload: boolean }
   | { type: TypingStateActionType.TOGGLE_IS_TYPING }
@@ -104,6 +119,14 @@ export const typingReducer = (state: TypingState, action: TypingStateAction) => 
 
       return newState
     }
+    case TypingStateActionType.SWITCH_TO_SENTENCE_MODE:
+      state.trainingMode = 'sentence-order'
+      state.isTyping = true
+      state.isShowSkip = false
+      state.sentenceData.index = 0
+      state.sentenceData.tokenIndex = 0
+      state.sentenceData.inputToken = ''
+      break
     case TypingStateActionType.SET_IS_SKIP:
       state.isShowSkip = action.payload
       break
