@@ -1,5 +1,5 @@
 import type { SentenceData, TypingState, UserInputLog } from './type'
-import type { WordWithIndex } from '@/typings'
+import type { SentenceItem, WordWithIndex } from '@/typings'
 import type { LetterMistakes } from '@/utils/db/record'
 import '@/utils/db/review-record'
 import { mergeLetterMistake } from '@/utils/db/utils'
@@ -51,6 +51,7 @@ export const initialUserInputLog: UserInputLog = {
 
 export enum TypingStateActionType {
   SETUP_CHAPTER = 'SETUP_CHAPTER',
+  SETUP_SENTENCES = 'SETUP_SENTENCES',
   SWITCH_TO_SENTENCE_MODE = 'SWITCH_TO_SENTENCE_MODE',
   SET_IS_SKIP = 'SET_IS_SKIP',
   SET_IS_TYPING = 'SET_IS_TYPING',
@@ -77,6 +78,7 @@ export enum TypingStateActionType {
 
 export type TypingStateAction =
   | { type: TypingStateActionType.SETUP_CHAPTER; payload: { words: WordWithIndex[]; shouldShuffle: boolean; initialIndex?: number } }
+  | { type: TypingStateActionType.SETUP_SENTENCES; payload: { sentences: SentenceItem[] } }
   | { type: TypingStateActionType.SWITCH_TO_SENTENCE_MODE }
   | { type: TypingStateActionType.SET_IS_SKIP; payload: boolean }
   | { type: TypingStateActionType.SET_IS_TYPING; payload: boolean }
@@ -119,6 +121,18 @@ export const typingReducer = (state: TypingState, action: TypingStateAction) => 
 
       return newState
     }
+    case TypingStateActionType.SETUP_SENTENCES:
+      state.sentenceData = {
+        ...structuredClone(initialSentenceData),
+        sentences: action.payload.sentences,
+        userInputLogs: action.payload.sentences.map((_, index) => ({
+          index,
+          correctCount: 0,
+          wrongCount: 0,
+          wrongTokens: [],
+        })),
+      }
+      break
     case TypingStateActionType.SWITCH_TO_SENTENCE_MODE:
       state.trainingMode = 'sentence-order'
       state.isTyping = true
