@@ -30,4 +30,45 @@ describe('typingReducer sentence mode transition', () => {
     expect(nextState.sentenceData.index).toBe(0)
     expect(nextState.sentenceData.tokenIndex).toBe(0)
   })
+
+  it('advances token index after a correct token', () => {
+    const state = structuredClone(initialState)
+    state.trainingMode = 'sentence-order'
+    state.sentenceData.sentences = [
+      { id: 'cet4-0-0', text: 'cancel the plan', tokens: ['cancel', 'the', 'plan'], trans: '取消计划', chapter: 0, sourceDictId: 'cet4' },
+    ]
+    state.sentenceData.userInputLogs = [{ index: 0, correctCount: 0, wrongCount: 0, wrongTokens: [] }]
+
+    const nextState = produce(state, (draft) => {
+      typingReducer(draft, {
+        type: TypingStateActionType.REPORT_CORRECT_TOKEN,
+        payload: { token: 'cancel' },
+      })
+    })
+
+    expect(nextState.sentenceData.tokenIndex).toBe(1)
+    expect(nextState.sentenceData.inputToken).toBe('')
+    expect(nextState.sentenceData.correctCount).toBe(1)
+  })
+
+  it('marks chapter finished after the last sentence token', () => {
+    const state = structuredClone(initialState)
+    state.trainingMode = 'sentence-order'
+    state.sentenceData.sentences = [{ id: 'cet4-0-0', text: 'cancel', tokens: ['cancel'], trans: '取消', chapter: 0, sourceDictId: 'cet4' }]
+    state.sentenceData.userInputLogs = [{ index: 0, correctCount: 0, wrongCount: 0, wrongTokens: [] }]
+
+    const afterToken = produce(state, (draft) => {
+      typingReducer(draft, {
+        type: TypingStateActionType.REPORT_CORRECT_TOKEN,
+        payload: { token: 'cancel' },
+      })
+    })
+
+    const finishedState = produce(afterToken, (draft) => {
+      typingReducer(draft, { type: TypingStateActionType.NEXT_SENTENCE })
+    })
+
+    expect(finishedState.isFinished).toBe(true)
+    expect(finishedState.isTyping).toBe(false)
+  })
 })

@@ -53,6 +53,10 @@ export enum TypingStateActionType {
   SETUP_CHAPTER = 'SETUP_CHAPTER',
   SETUP_SENTENCES = 'SETUP_SENTENCES',
   SWITCH_TO_SENTENCE_MODE = 'SWITCH_TO_SENTENCE_MODE',
+  REPORT_CORRECT_TOKEN = 'REPORT_CORRECT_TOKEN',
+  REPORT_WRONG_TOKEN = 'REPORT_WRONG_TOKEN',
+  NEXT_SENTENCE = 'NEXT_SENTENCE',
+  RESET_CURRENT_TOKEN = 'RESET_CURRENT_TOKEN',
   SET_IS_SKIP = 'SET_IS_SKIP',
   SET_IS_TYPING = 'SET_IS_TYPING',
   TOGGLE_IS_TYPING = 'TOGGLE_IS_TYPING',
@@ -80,6 +84,10 @@ export type TypingStateAction =
   | { type: TypingStateActionType.SETUP_CHAPTER; payload: { words: WordWithIndex[]; shouldShuffle: boolean; initialIndex?: number } }
   | { type: TypingStateActionType.SETUP_SENTENCES; payload: { sentences: SentenceItem[] } }
   | { type: TypingStateActionType.SWITCH_TO_SENTENCE_MODE }
+  | { type: TypingStateActionType.REPORT_CORRECT_TOKEN; payload: { token: string } }
+  | { type: TypingStateActionType.REPORT_WRONG_TOKEN; payload: { token: string } }
+  | { type: TypingStateActionType.NEXT_SENTENCE }
+  | { type: TypingStateActionType.RESET_CURRENT_TOKEN }
   | { type: TypingStateActionType.SET_IS_SKIP; payload: boolean }
   | { type: TypingStateActionType.SET_IS_TYPING; payload: boolean }
   | { type: TypingStateActionType.TOGGLE_IS_TYPING }
@@ -141,6 +149,45 @@ export const typingReducer = (state: TypingState, action: TypingStateAction) => 
       state.sentenceData.tokenIndex = 0
       state.sentenceData.inputToken = ''
       break
+    case TypingStateActionType.REPORT_CORRECT_TOKEN: {
+      state.sentenceData.correctCount += 1
+      state.sentenceData.inputToken = ''
+      const log = state.sentenceData.userInputLogs[state.sentenceData.index]
+      if (log) {
+        log.correctCount += 1
+      }
+      state.sentenceData.tokenIndex += 1
+      break
+    }
+    case TypingStateActionType.REPORT_WRONG_TOKEN: {
+      state.sentenceData.wrongCount += 1
+      state.sentenceData.inputToken = ''
+      const log = state.sentenceData.userInputLogs[state.sentenceData.index]
+      if (log) {
+        log.wrongCount += 1
+        log.wrongTokens.push(action.payload.token)
+      }
+      break
+    }
+    case TypingStateActionType.RESET_CURRENT_TOKEN:
+      state.sentenceData.inputToken = ''
+      break
+    case TypingStateActionType.NEXT_SENTENCE: {
+      const isLastSentence = state.sentenceData.index >= state.sentenceData.sentences.length - 1
+      if (isLastSentence) {
+        state.isFinished = true
+        state.isTyping = false
+        state.isShowSkip = false
+        break
+      }
+
+      state.sentenceData.index += 1
+      state.sentenceData.tokenIndex = 0
+      state.sentenceData.inputToken = ''
+      state.sentenceData.sentenceCount += 1
+      state.isShowSkip = false
+      break
+    }
     case TypingStateActionType.SET_IS_SKIP:
       state.isShowSkip = action.payload
       break
