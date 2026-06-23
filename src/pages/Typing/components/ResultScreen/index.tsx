@@ -103,6 +103,14 @@ const ResultScreen = () => {
     }
   }, [correctRate])
 
+  const hasSentenceTraining = state.sentenceData.sentences.length > 0
+
+  const sentenceAccuracy = useMemo(() => {
+    const totalInputs = state.sentenceData.correctCount + state.sentenceData.wrongCount
+    if (totalInputs === 0) return 100
+    return Math.floor((state.sentenceData.correctCount / totalInputs) * 100)
+  }, [state.sentenceData.correctCount, state.sentenceData.wrongCount])
+
   const timeString = useMemo(() => {
     const seconds = state.timerData.time
     const minutes = Math.floor(seconds / 60)
@@ -287,6 +295,17 @@ const ResultScreen = () => {
                 </a>
               </div>
             </div>
+            {hasSentenceTraining && (
+              <div className="mt-6 rounded-xl bg-indigo-50 px-6 py-4 text-sm text-gray-700 dark:bg-gray-700 dark:text-gray-100">
+                <h3 className="mb-2 text-base font-semibold">连词成句训练</h3>
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                  <div>句子总数：{state.sentenceData.sentences.length}</div>
+                  <div>完成句数：{state.sentenceData.sentenceCount}</div>
+                  <div>正确 token：{state.sentenceData.correctCount}</div>
+                  <div>正确率：{sentenceAccuracy}%</div>
+                </div>
+              </div>
+            )}
             <div className="mt-10 flex w-full justify-center gap-5 px-5 text-xl">
               {!isReviewMode && (
                 <>

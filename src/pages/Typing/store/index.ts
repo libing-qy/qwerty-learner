@@ -49,6 +49,26 @@ export const initialUserInputLog: UserInputLog = {
   LetterMistakes: {},
 }
 
+const createSentenceData = (sentences: SentenceItem[]): SentenceData => ({
+  ...structuredClone(initialSentenceData),
+  sentences,
+  userInputLogs: sentences.map((_, index) => ({
+    index,
+    correctCount: 0,
+    wrongCount: 0,
+    wrongTokens: [],
+  })),
+})
+
+const switchToSentenceMode = (state: TypingState) => {
+  state.trainingMode = 'sentence-order'
+  state.isTyping = true
+  state.isShowSkip = false
+  state.sentenceData.index = 0
+  state.sentenceData.tokenIndex = 0
+  state.sentenceData.inputToken = ''
+}
+
 export enum TypingStateActionType {
   SETUP_CHAPTER = 'SETUP_CHAPTER',
   SETUP_SENTENCES = 'SETUP_SENTENCES',
@@ -126,28 +146,15 @@ export const typingReducer = (state: TypingState, action: TypingStateAction) => 
       newState.chapterData.index = initialIndex
       newState.chapterData.words = words
       newState.chapterData.userInputLogs = words.map((_, index) => ({ ...structuredClone(initialUserInputLog), index }))
+      newState.sentenceData = createSentenceData(state.sentenceData.sentences)
 
       return newState
     }
     case TypingStateActionType.SETUP_SENTENCES:
-      state.sentenceData = {
-        ...structuredClone(initialSentenceData),
-        sentences: action.payload.sentences,
-        userInputLogs: action.payload.sentences.map((_, index) => ({
-          index,
-          correctCount: 0,
-          wrongCount: 0,
-          wrongTokens: [],
-        })),
-      }
+      state.sentenceData = createSentenceData(action.payload.sentences)
       break
     case TypingStateActionType.SWITCH_TO_SENTENCE_MODE:
-      state.trainingMode = 'sentence-order'
-      state.isTyping = true
-      state.isShowSkip = false
-      state.sentenceData.index = 0
-      state.sentenceData.tokenIndex = 0
-      state.sentenceData.inputToken = ''
+      switchToSentenceMode(state)
       break
     case TypingStateActionType.REPORT_CORRECT_TOKEN: {
       state.sentenceData.correctCount += 1
@@ -166,6 +173,9 @@ export const typingReducer = (state: TypingState, action: TypingStateAction) => 
       if (log) {
         log.wrongCount += 1
         log.wrongTokens.push(action.payload.token)
+        if (log.wrongCount >= 3) {
+          state.isShowSkip = true
+        }
       }
       break
     }
@@ -175,6 +185,7 @@ export const typingReducer = (state: TypingState, action: TypingStateAction) => 
     case TypingStateActionType.NEXT_SENTENCE: {
       const isLastSentence = state.sentenceData.index >= state.sentenceData.sentences.length - 1
       if (isLastSentence) {
+        state.sentenceData.sentenceCount += 1
         state.isFinished = true
         state.isTyping = false
         state.isShowSkip = false
@@ -237,8 +248,12 @@ export const typingReducer = (state: TypingState, action: TypingStateAction) => 
     case TypingStateActionType.SKIP_WORD: {
       const newIndex = state.chapterData.index + 1
       if (newIndex >= state.chapterData.words.length) {
-        state.isTyping = false
-        state.isFinished = true
+        if (state.sentenceData.sentences.length > 0) {
+          switchToSentenceMode(state)
+        } else {
+          state.isTyping = false
+          state.isFinished = true
+        }
       } else {
         state.chapterData.index = newIndex
       }
@@ -259,6 +274,7 @@ export const typingReducer = (state: TypingState, action: TypingStateAction) => 
       newState.chapterData.userInputLogs = state.chapterData.words.map((_, index) => ({ ...structuredClone(initialUserInputLog), index }))
       newState.isTyping = true
       newState.chapterData.words = action.shouldShuffle ? shuffle(state.chapterData.words) : state.chapterData.words
+      newState.sentenceData = createSentenceData(state.sentenceData.sentences)
       newState.isTransVisible = state.isTransVisible
       return newState
     }
@@ -266,6 +282,7 @@ export const typingReducer = (state: TypingState, action: TypingStateAction) => 
       const newState = structuredClone(initialState)
       newState.chapterData.userInputLogs = state.chapterData.words.map((_, index) => ({ ...structuredClone(initialUserInputLog), index }))
       newState.isTyping = true
+      newState.sentenceData = createSentenceData(state.sentenceData.sentences)
       newState.isTransVisible = state.isTransVisible
       return newState
     }

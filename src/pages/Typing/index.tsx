@@ -61,8 +61,13 @@ const App: React.FC = () => {
   }, [currentDictId, setCurrentChapter, setCurrentDictId])
 
   const skipWord = useCallback(() => {
+    if (state.trainingMode === 'sentence-order') {
+      dispatch({ type: TypingStateActionType.NEXT_SENTENCE })
+      return
+    }
+
     dispatch({ type: TypingStateActionType.SKIP_WORD })
-  }, [dispatch])
+  }, [dispatch, state.trainingMode])
 
   useEffect(() => {
     const onBlur = () => {

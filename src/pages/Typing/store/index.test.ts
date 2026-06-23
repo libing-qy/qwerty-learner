@@ -5,6 +5,33 @@ import { describe, expect, it, vi } from 'vitest'
 vi.mock('@/utils/db/review-record', () => ({}))
 
 describe('typingReducer sentence mode transition', () => {
+  it('preserves loaded sentences when chapter setup resets word state', () => {
+    const state = structuredClone(initialState)
+    state.sentenceData.sentences = [
+      {
+        id: 'cet4-0-0',
+        text: 'cancel the plan',
+        tokens: ['cancel', 'the', 'plan'],
+        trans: '取消计划',
+        chapter: 0,
+        sourceDictId: 'cet4',
+      },
+    ]
+
+    const nextState = produce(state, (draft) => {
+      return typingReducer(draft, {
+        type: TypingStateActionType.SETUP_CHAPTER,
+        payload: {
+          words: [{ name: 'cancel', trans: ['取消'], usphone: '', ukphone: '', index: 0 }],
+          shouldShuffle: false,
+        },
+      })
+    })
+
+    expect(nextState.sentenceData.sentences).toHaveLength(1)
+    expect(nextState.sentenceData.userInputLogs).toHaveLength(1)
+  })
+
   it('switches to sentence mode when word stage finishes and sentences exist', () => {
     const state = structuredClone(initialState)
     state.trainingMode = 'word'
@@ -70,5 +97,29 @@ describe('typingReducer sentence mode transition', () => {
 
     expect(finishedState.isFinished).toBe(true)
     expect(finishedState.isTyping).toBe(false)
+  })
+
+  it('switches to sentence mode when skipping the final word of a sentence-enabled chapter', () => {
+    const state = structuredClone(initialState)
+    state.trainingMode = 'word'
+    state.chapterData.words = [{ name: 'cancel', trans: ['取消'], usphone: '', ukphone: '', index: 0 }]
+    state.chapterData.index = 0
+    state.sentenceData.sentences = [
+      {
+        id: 'cet4-0-0',
+        text: 'cancel the plan',
+        tokens: ['cancel', 'the', 'plan'],
+        trans: '取消计划',
+        chapter: 0,
+        sourceDictId: 'cet4',
+      },
+    ]
+
+    const nextState = produce(state, (draft) => {
+      typingReducer(draft, { type: TypingStateActionType.SKIP_WORD })
+    })
+
+    expect(nextState.trainingMode).toBe('sentence-order')
+    expect(nextState.isFinished).toBe(false)
   })
 })

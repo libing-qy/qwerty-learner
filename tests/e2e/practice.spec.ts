@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test'
+import { expect, Page, test } from '@playwright/test'
 
 const pressWord = async (page: Page, word: string) => {
   const letters = word.split('')
@@ -14,11 +14,32 @@ const pressWords = async (page: Page, words: string[]) => {
   }
 }
 
+const completeFirstSentenceChapter = async (page: Page) => {
+  await pressWord(page, 'cancel')
+  await page.keyboard.press('Space')
+  await pressWord(page, 'the')
+  await page.keyboard.press('Space')
+  await pressWord(page, 'plan')
+  await page.keyboard.press('Space')
+
+  await pressWord(page, 'the')
+  await page.keyboard.press('Space')
+  await pressWord(page, 'audience')
+  await page.keyboard.press('Space')
+  await pressWord(page, 'remained')
+  await page.keyboard.press('Space')
+  await pressWord(page, 'silent')
+  await page.keyboard.press('Space')
+}
+
 test.describe('Practice', () => {
   test.beforeEach(async ({ page }) => {
     test.slow()
     await page.goto('/')
-    await page.getByLabel('关闭提示').click()
+    const closeTip = page.getByLabel('关闭提示')
+    if (await closeTip.isVisible().catch(() => false)) {
+      await closeTip.click()
+    }
   })
 
   test('Press any key to start', async ({ page }) => {
@@ -53,10 +74,10 @@ test.describe('Practice', () => {
 
     await pressWord(page, 'canca')
 
-    await page.locator('div', { hasText: '输入数' }).locator('span', { hasText: /^5$/ }).first().click()
-    await page.locator('div', { hasText: '正确数' }).locator('span', { hasText: /^4$/ }).first().click()
+    await expect(page.getByText('输入数').locator('xpath=preceding-sibling::span[1]')).toHaveText('6')
+    await expect(page.getByText('正确数').locator('xpath=preceding-sibling::span[1]')).toHaveText('4')
     await page.waitForTimeout(500)
-    await page.locator('div', { hasText: '正确率' }).locator('span', { hasText: /^80$/ }).click()
+    await expect(page.getByText('正确率').locator('xpath=preceding-sibling::span[1]')).toHaveText('67')
   })
 
   test('Enter the correct letter, should show green color', async ({ page }) => {
@@ -111,11 +132,55 @@ test.describe('Practice', () => {
 
     await pressWords(page, chapter1)
 
-    await expect(await page.getByText('100%').isVisible()).toBeTruthy
+    await expect(page.getByText('连词成句')).toBeVisible()
+    await completeFirstSentenceChapter(page)
+
+    await expect(page.getByText('正确率：100%')).toBeVisible()
     await expect(await page.getByText('表现不错！全对了！').isVisible()).toBeTruthy()
 
     await page.getByRole('button', { name: '下一章节' }).click()
 
     await expect(await page.getByText('第 2 章').first().isVisible()).toBeTruthy()
+  })
+
+  test('Complete chapter words and automatically enter sentence order training', async ({ page }) => {
+    await page.keyboard.press('Enter')
+
+    const chapter1 = [
+      'cancel',
+      'explosive',
+      'numerous',
+      'govern',
+      'analyse',
+      'discourage',
+      'resemble',
+      'remote',
+      'salary',
+      'pollution',
+      'pretend',
+      'kettle',
+      'wreck',
+      'drunk',
+      'calculate',
+      'persistent',
+      'sake',
+      'conceal',
+      'audience',
+      'meanwhile',
+    ]
+
+    await pressWords(page, chapter1)
+
+    await expect(page.getByText('连词成句')).toBeVisible()
+    await expect(page.getByText('取消计划')).toBeVisible()
+
+    await pressWord(page, 'cancel')
+    await page.keyboard.press('Space')
+    await pressWord(page, 'the')
+    await page.keyboard.press('Space')
+    await pressWord(page, 'plan')
+    await page.keyboard.press('Space')
+
+    await expect(page.getByText('观众保持安静')).toBeVisible()
   })
 })

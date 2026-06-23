@@ -5,7 +5,10 @@ import { TypingContext } from '@/pages/Typing/store'
 import { useContext } from 'react'
 
 export default function SentencePanel() {
-  const { state } = useContext(TypingContext)!
+  const typingContext = useContext(TypingContext)
+  if (!typingContext) return null
+
+  const { state } = typingContext
   const sentence = state.sentenceData.sentences[state.sentenceData.index]
 
   if (!sentence) return null

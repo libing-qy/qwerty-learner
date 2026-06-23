@@ -1,15 +1,18 @@
 import { TypingContext, TypingStateActionType } from '@/pages/Typing/store'
-import { useContext, useMemo, useState } from 'react'
+import { useContext, useState } from 'react'
 
 export default function SentenceInput() {
-  const { state, dispatch } = useContext(TypingContext)!
+  const typingContext = useContext(TypingContext)
   const [value, setValue] = useState('')
+
+  if (!typingContext) return null
+
+  const { state, dispatch } = typingContext
   const sentence = state.sentenceData.sentences[state.sentenceData.index]
-  const targetToken = sentence?.tokens[state.sentenceData.tokenIndex] ?? ''
-  const completedTokens = useMemo(
-    () => sentence?.tokens.slice(0, state.sentenceData.tokenIndex) ?? [],
-    [sentence, state.sentenceData.tokenIndex],
-  )
+  if (!sentence) return null
+
+  const targetToken = sentence.tokens[state.sentenceData.tokenIndex] ?? ''
+  const completedTokens = sentence.tokens.slice(0, state.sentenceData.tokenIndex)
 
   return (
     <div className="flex w-full max-w-3xl flex-col items-center gap-4">
@@ -33,7 +36,7 @@ export default function SentenceInput() {
           if (!token) return
           if (token.toLowerCase() === targetToken.toLowerCase()) {
             dispatch({ type: TypingStateActionType.REPORT_CORRECT_TOKEN, payload: { token } })
-            const isLastToken = state.sentenceData.tokenIndex >= (sentence?.tokens.length ?? 1) - 1
+            const isLastToken = state.sentenceData.tokenIndex >= sentence.tokens.length - 1
             if (isLastToken) {
               dispatch({ type: TypingStateActionType.NEXT_SENTENCE })
             }
