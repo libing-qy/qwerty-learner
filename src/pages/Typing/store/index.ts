@@ -60,19 +60,34 @@ const createSentenceData = (sentences: SentenceItem[]): SentenceData => ({
   })),
 })
 
+const resetSentenceInputState = (state: TypingState) => {
+  state.sentenceData.inputToken = ''
+}
+
+const resetSentenceTokenState = (state: TypingState) => {
+  resetSentenceInputState(state)
+  state.sentenceData.tokenIndex = 0
+}
+
 const switchToSentenceMode = (state: TypingState) => {
+  if (state.isFinished || state.sentenceData.sentences.length === 0) {
+    return
+  }
+
   state.trainingMode = 'sentence-order'
   state.isTyping = true
   state.isShowSkip = false
-  state.sentenceData.index = 0
-  state.sentenceData.tokenIndex = 0
-  state.sentenceData.inputToken = ''
+  if (state.sentenceData.index < 0 || state.sentenceData.index >= state.sentenceData.sentences.length) {
+    state.sentenceData.index = 0
+  }
+  resetSentenceTokenState(state)
 }
 
 export enum TypingStateActionType {
   SETUP_CHAPTER = 'SETUP_CHAPTER',
   SETUP_SENTENCES = 'SETUP_SENTENCES',
   SWITCH_TO_SENTENCE_MODE = 'SWITCH_TO_SENTENCE_MODE',
+  SWITCH_TO_WORD_MODE = 'SWITCH_TO_WORD_MODE',
   REPORT_CORRECT_TOKEN = 'REPORT_CORRECT_TOKEN',
   REPORT_WRONG_TOKEN = 'REPORT_WRONG_TOKEN',
   NEXT_SENTENCE = 'NEXT_SENTENCE',
@@ -88,6 +103,7 @@ export enum TypingStateActionType {
   INCREASE_WRONG_WORD = 'INCREASE_WRONG_WORD',
   SKIP_WORD = 'SKIP_WORD',
   SKIP_2_WORD_INDEX = 'SKIP_2_WORD_INDEX',
+  SKIP_2_SENTENCE_INDEX = 'SKIP_2_SENTENCE_INDEX',
   REPEAT_CHAPTER = 'REPEAT_CHAPTER',
   NEXT_CHAPTER = 'NEXT_CHAPTER',
   TOGGLE_WORD_VISIBLE = 'TOGGLE_WORD_VISIBLE',
@@ -104,6 +120,7 @@ export type TypingStateAction =
   | { type: TypingStateActionType.SETUP_CHAPTER; payload: { words: WordWithIndex[]; shouldShuffle: boolean; initialIndex?: number } }
   | { type: TypingStateActionType.SETUP_SENTENCES; payload: { sentences: SentenceItem[] } }
   | { type: TypingStateActionType.SWITCH_TO_SENTENCE_MODE }
+  | { type: TypingStateActionType.SWITCH_TO_WORD_MODE }
   | { type: TypingStateActionType.REPORT_CORRECT_TOKEN; payload: { token: string } }
   | { type: TypingStateActionType.REPORT_WRONG_TOKEN; payload: { token: string } }
   | { type: TypingStateActionType.NEXT_SENTENCE }
@@ -123,6 +140,7 @@ export type TypingStateAction =
   | { type: TypingStateActionType.FINISH_CHAPTER }
   | { type: TypingStateActionType.SKIP_WORD }
   | { type: TypingStateActionType.SKIP_2_WORD_INDEX; newIndex: number }
+  | { type: TypingStateActionType.SKIP_2_SENTENCE_INDEX; newIndex: number }
   | { type: TypingStateActionType.REPEAT_CHAPTER; shouldShuffle: boolean }
   | { type: TypingStateActionType.NEXT_CHAPTER }
   | { type: TypingStateActionType.TOGGLE_TRANS_VISIBLE }
@@ -156,6 +174,15 @@ export const typingReducer = (state: TypingState, action: TypingStateAction) => 
     case TypingStateActionType.SWITCH_TO_SENTENCE_MODE:
       switchToSentenceMode(state)
       break
+    case TypingStateActionType.SWITCH_TO_WORD_MODE:
+      if (state.isFinished) {
+        break
+      }
+
+      state.trainingMode = 'word'
+      state.isTyping = true
+      state.isShowSkip = false
+      break
     case TypingStateActionType.REPORT_CORRECT_TOKEN: {
       state.sentenceData.correctCount += 1
       state.sentenceData.inputToken = ''
@@ -180,7 +207,7 @@ export const typingReducer = (state: TypingState, action: TypingStateAction) => 
       break
     }
     case TypingStateActionType.RESET_CURRENT_TOKEN:
-      state.sentenceData.inputToken = ''
+      resetSentenceInputState(state)
       break
     case TypingStateActionType.NEXT_SENTENCE: {
       const isLastSentence = state.sentenceData.index >= state.sentenceData.sentences.length - 1
@@ -193,8 +220,7 @@ export const typingReducer = (state: TypingState, action: TypingStateAction) => 
       }
 
       state.sentenceData.index += 1
-      state.sentenceData.tokenIndex = 0
-      state.sentenceData.inputToken = ''
+      resetSentenceTokenState(state)
       state.sentenceData.sentenceCount += 1
       state.isShowSkip = false
       break
@@ -267,6 +293,20 @@ export const typingReducer = (state: TypingState, action: TypingStateAction) => 
         state.isFinished = true
       }
       state.chapterData.index = newIndex
+      break
+    }
+    case TypingStateActionType.SKIP_2_SENTENCE_INDEX: {
+      if (state.isFinished) {
+        break
+      }
+
+      const newIndex = action.newIndex
+      if (newIndex < 0 || newIndex >= state.sentenceData.sentences.length) {
+        break
+      }
+      state.sentenceData.index = newIndex
+      resetSentenceTokenState(state)
+      state.isShowSkip = false
       break
     }
     case TypingStateActionType.REPEAT_CHAPTER: {
