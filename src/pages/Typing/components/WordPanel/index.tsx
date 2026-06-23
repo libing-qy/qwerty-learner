@@ -2,6 +2,7 @@ import { TypingContext, TypingStateActionType } from '../../store'
 import type { TypingState } from '../../store/type'
 import PrevAndNextWord from '../PrevAndNextWord'
 import Progress from '../Progress'
+import SentencePanel from '../SentencePanel'
 import Phonetic from './components/Phonetic'
 import Translation from './components/Translation'
 import WordComponent from './components/Word'
@@ -20,6 +21,7 @@ export default function WordPanel() {
   const [wordComponentKey, setWordComponentKey] = useState(0)
   const [currentWordExerciseCount, setCurrentWordExerciseCount] = useState(0)
   const { times: loopWordTimes } = useAtomValue(loopWordConfigAtom)
+  const hasSentenceTraining = state.sentenceData.sentences.length > 0
   const currentWord = state.chapterData.words[state.chapterData.index]
   const nextWord = state.chapterData.words[state.chapterData.index + 1] as Word | undefined
 
@@ -72,6 +74,11 @@ export default function WordPanel() {
         }
       }
     } else {
+      if (hasSentenceTraining) {
+        dispatch({ type: TypingStateActionType.SWITCH_TO_SENTENCE_MODE })
+        return
+      }
+
       // 用户完成当前章节
       dispatch({ type: TypingStateActionType.FINISH_CHAPTER })
       if (isReviewMode) {
@@ -84,6 +91,7 @@ export default function WordPanel() {
     currentWordExerciseCount,
     loopWordTimes,
     dispatch,
+    hasSentenceTraining,
     reloadCurrentWordComponent,
     isReviewMode,
     updateReviewRecord,
@@ -147,6 +155,15 @@ export default function WordPanel() {
   const shouldShowTranslation = useMemo(() => {
     return isShowTranslation || state.isTransVisible
   }, [isShowTranslation, state.isTransVisible])
+
+  if (state.trainingMode === 'sentence-order') {
+    return (
+      <div className="container flex h-full w-full flex-col items-center justify-center">
+        <SentencePanel />
+        <Progress className={`mb-10 mt-auto ${state.isTyping ? 'opacity-100' : 'opacity-0'}`} />
+      </div>
+    )
+  }
 
   return (
     <div className="container flex h-full w-full flex-col items-center justify-center">
