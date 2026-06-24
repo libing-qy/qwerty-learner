@@ -46,6 +46,7 @@
 ### Task 1: Extend reducer navigation actions
 
 **Files:**
+
 - Modify: `src/pages/Typing/store/index.ts`
 - Test: `src/pages/Typing/store/index.test.ts`
 
@@ -204,7 +205,7 @@ becomes:
 and inside `NEXT_SENTENCE` replace the manual resets with:
 
 ```ts
-      resetSentenceTokenState(state)
+resetSentenceTokenState(state)
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -229,6 +230,7 @@ git commit -m "feat: add typing mode navigation actions"
 ### Task 2: Add header mode switcher
 
 **Files:**
+
 - Modify: `src/pages/Typing/index.tsx`
 - Create: `src/pages/Typing/ModeSwitcher.test.tsx`
 
@@ -239,9 +241,9 @@ Create `src/pages/Typing/ModeSwitcher.test.tsx` with:
 ```tsx
 import App from './index'
 import { currentChapterAtom, currentDictIdAtom, isReviewModeAtom, randomConfigAtom, reviewModeInfoAtom } from '@/store'
-import { Provider, createStore } from 'jotai'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { Provider, createStore } from 'jotai'
 import { vi } from 'vitest'
 
 vi.mock('./hooks/useWordList', () => ({
@@ -315,45 +317,53 @@ Expected: FAIL because the buttons do not exist yet.
 In `src/pages/Typing/index.tsx`, add derived flags:
 
 ```tsx
-  const hasSentenceTraining = sentences.length > 0
-  const showSentenceSwitcher = !isReviewMode
+const hasSentenceTraining = sentences.length > 0
+const showSentenceSwitcher = !isReviewMode
 ```
 
 Add callbacks:
 
 ```tsx
-  const switchToWordMode = useCallback(() => {
-    dispatch({ type: TypingStateActionType.SWITCH_TO_WORD_MODE })
-  }, [dispatch])
+const switchToWordMode = useCallback(() => {
+  dispatch({ type: TypingStateActionType.SWITCH_TO_WORD_MODE })
+}, [dispatch])
 
-  const switchToSentenceMode = useCallback(() => {
-    if (!hasSentenceTraining) return
-    dispatch({ type: TypingStateActionType.SWITCH_TO_SENTENCE_MODE })
-  }, [dispatch, hasSentenceTraining])
+const switchToSentenceMode = useCallback(() => {
+  if (!hasSentenceTraining) return
+  dispatch({ type: TypingStateActionType.SWITCH_TO_SENTENCE_MODE })
+}, [dispatch, hasSentenceTraining])
 ```
 
 Insert these buttons inside `<Header>` after `<StartButton />`:
 
 ```tsx
-          {showSentenceSwitcher && (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className={`my-btn-primary h-10 px-3 text-sm ${state.trainingMode === 'word' ? 'bg-indigo-500 text-white' : 'bg-white text-gray-700 dark:bg-gray-700 dark:text-gray-100'}`}
-                onClick={switchToWordMode}
-              >
-                单词练习
-              </button>
-              <button
-                type="button"
-                className={`my-btn-primary h-10 px-3 text-sm ${state.trainingMode === 'sentence-order' ? 'bg-indigo-500 text-white' : 'bg-white text-gray-700 dark:bg-gray-700 dark:text-gray-100'} ${!hasSentenceTraining ? 'cursor-not-allowed opacity-50' : ''}`}
-                onClick={switchToSentenceMode}
-                disabled={!hasSentenceTraining}
-              >
-                句子练习
-              </button>
-            </div>
-          )}
+{
+  showSentenceSwitcher && (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        className={`my-btn-primary h-10 px-3 text-sm ${
+          state.trainingMode === 'word' ? 'bg-indigo-500 text-white' : 'bg-white text-gray-700 dark:bg-gray-700 dark:text-gray-100'
+        }`}
+        onClick={switchToWordMode}
+      >
+        单词练习
+      </button>
+      <button
+        type="button"
+        className={`my-btn-primary h-10 px-3 text-sm ${
+          state.trainingMode === 'sentence-order'
+            ? 'bg-indigo-500 text-white'
+            : 'bg-white text-gray-700 dark:bg-gray-700 dark:text-gray-100'
+        } ${!hasSentenceTraining ? 'cursor-not-allowed opacity-50' : ''}`}
+        onClick={switchToSentenceMode}
+        disabled={!hasSentenceTraining}
+      >
+        句子练习
+      </button>
+    </div>
+  )
+}
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -378,6 +388,7 @@ git commit -m "feat: add typing mode switcher"
 ### Task 3: Reuse the left drawer for sentence navigation
 
 **Files:**
+
 - Modify: `src/pages/Typing/components/WordList/index.tsx`
 - Modify: `src/pages/Typing/components/WordList/WordCard.tsx`
 - Create: `src/pages/Typing/components/WordList/SentenceCard.tsx`
@@ -482,30 +493,30 @@ export default function WordCard({
 Replace `handlePlay` with:
 
 ```tsx
-  const handleClick = useCallback(() => {
-    onClick?.()
-    wordPronunciationIconRef.current?.play()
-  }, [onClick])
+const handleClick = useCallback(() => {
+  onClick?.()
+  wordPronunciationIconRef.current?.play()
+}, [onClick])
 ```
 
 Use it on the root element:
 
 ```tsx
-      onClick={handleClick}
+onClick = { handleClick }
 ```
 
 Update `src/pages/Typing/components/WordList/index.tsx` with navigation handlers:
 
 ```tsx
-  const jumpToWord = (index: number) => {
-    dispatch({ type: TypingStateActionType.SKIP_2_WORD_INDEX, newIndex: index })
-    closeModal()
-  }
+const jumpToWord = (index: number) => {
+  dispatch({ type: TypingStateActionType.SKIP_2_WORD_INDEX, newIndex: index })
+  closeModal()
+}
 
-  const jumpToSentence = (index: number) => {
-    dispatch({ type: TypingStateActionType.SKIP_2_SENTENCE_INDEX, newIndex: index })
-    closeModal()
-  }
+const jumpToSentence = (index: number) => {
+  dispatch({ type: TypingStateActionType.SKIP_2_SENTENCE_INDEX, newIndex: index })
+  closeModal()
+}
 ```
 
 Import and render by mode:
@@ -515,23 +526,25 @@ import SentenceCard from './SentenceCard'
 ```
 
 ```tsx
-              {state.trainingMode === 'sentence-order'
-                ? state.sentenceData.sentences.map((sentence, index) => (
-                    <SentenceCard
-                      key={sentence.id}
-                      sentence={sentence}
-                      isActive={state.sentenceData.index === index}
-                      onClick={() => jumpToSentence(index)}
-                    />
-                  ))
-                : state.chapterData.words?.map((word, index) => (
-                    <WordCard
-                      word={word}
-                      key={`${word.name}_${index}`}
-                      isActive={state.chapterData.index === index}
-                      onClick={() => jumpToWord(index)}
-                    />
-                  ))}
+{
+  state.trainingMode === 'sentence-order'
+    ? state.sentenceData.sentences.map((sentence, index) => (
+        <SentenceCard
+          key={sentence.id}
+          sentence={sentence}
+          isActive={state.sentenceData.index === index}
+          onClick={() => jumpToSentence(index)}
+        />
+      ))
+    : state.chapterData.words?.map((word, index) => (
+        <WordCard
+          word={word}
+          key={`${word.name}_${index}`}
+          isActive={state.chapterData.index === index}
+          onClick={() => jumpToWord(index)}
+        />
+      ))
+}
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -556,6 +569,7 @@ git commit -m "feat: reuse typing drawer for sentence navigation"
 ### Task 4: Complete mode-switch integration and regressions
 
 **Files:**
+
 - Modify: `src/pages/Typing/ModeSwitcher.test.tsx`
 - Modify: `src/pages/Typing/components/WordList/index.test.tsx`
 - Modify: `src/pages/Typing/store/index.test.ts`
@@ -662,6 +676,7 @@ git commit -m "test: cover typing mode navigation"
 ### Task 5: Full verification
 
 **Files:**
+
 - Modify: none unless verification reveals defects
 - Test: existing focused files
 

@@ -14,5 +14,45 @@
     "trans": "观众保持安静",
     "chapter": 0,
     "sourceDictId": "cet4"
+  },
+  {
+    "id": "cet4-0-2",
+    "text": "numerous factories cause air pollution",
+    "tokens": ["numerous", "factories", "cause", "air", "pollution"],
+    "trans": "许多工厂造成空气污染",
+    "chapter": 0,
+    "sourceDictId": "cet4"
+  },
+  {
+    "id": "cet4-0-3",
+    "text": "the remote village needs clean water",
+    "tokens": ["the", "remote", "village", "needs", "clean", "water"],
+    "trans": "那个偏远村庄需要干净的水",
+    "chapter": 0,
+    "sourceDictId": "cet4"
+  },
+  {
+    "id": "cet4-0-4",
+    "text": "meanwhile we calculate the total cost",
+    "tokens": ["meanwhile", "we", "calculate", "the", "total", "cost"],
+    "trans": "与此同时我们计算总成本",
+    "chapter": 0,
+    "sourceDictId": "cet4"
+  },
+  {
+    "id": "cet4-0-5",
+    "text": "persistent practice improves typing speed",
+    "tokens": ["persistent", "practice", "improves", "typing", "speed"],
+    "trans": "持续练习能提高打字速度",
+    "chapter": 0,
+    "sourceDictId": "cet4"
+  },
+  {
+    "id": "cet4-0-6",
+    "text": "she tried to conceal her surprise",
+    "tokens": ["she", "tried", "to", "conceal", "her", "surprise"],
+    "trans": "她试图掩饰自己的惊讶",
+    "chapter": 0,
+    "sourceDictId": "cet4"
   }
 ]

@@ -38,6 +38,9 @@ const App: React.FC = () => {
 
   const reviewModeInfo = useAtomValue(reviewModeInfoAtom)
   const isReviewMode = useAtomValue(isReviewModeAtom)
+  const hasSentenceTraining = sentences.length > 0
+  const showWordSwitcher = !state.isFinished
+  const showSentenceSwitcher = !isReviewMode && !state.isFinished
 
   useEffect(() => {
     // 检测用户设备
@@ -68,6 +71,24 @@ const App: React.FC = () => {
 
     dispatch({ type: TypingStateActionType.SKIP_WORD })
   }, [dispatch, state.trainingMode])
+
+  const switchToWordMode = useCallback(() => {
+    if (state.trainingMode === 'word') return
+
+    dispatch({ type: TypingStateActionType.SWITCH_TO_WORD_MODE })
+    if (!state.isTyping) {
+      dispatch({ type: TypingStateActionType.SET_IS_TYPING, payload: false })
+    }
+  }, [dispatch, state.isTyping, state.trainingMode])
+
+  const switchToSentenceMode = useCallback(() => {
+    if (!hasSentenceTraining || state.trainingMode === 'sentence-order') return
+
+    dispatch({ type: TypingStateActionType.SWITCH_TO_SENTENCE_MODE })
+    if (!state.isTyping) {
+      dispatch({ type: TypingStateActionType.SET_IS_TYPING, payload: false })
+    }
+  }, [dispatch, hasSentenceTraining, state.isTyping, state.trainingMode])
 
   useEffect(() => {
     const onBlur = () => {
@@ -150,6 +171,33 @@ const App: React.FC = () => {
           <PronunciationSwitcher />
           <Switcher />
           <StartButton isLoading={isLoading} />
+          {showWordSwitcher && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className={`my-btn-primary h-10 px-3 text-sm ${
+                  state.trainingMode === 'word' ? 'bg-indigo-500 text-white' : 'bg-white text-gray-700 dark:bg-gray-700 dark:text-gray-100'
+                }`}
+                onClick={switchToWordMode}
+              >
+                单词练习
+              </button>
+              {showSentenceSwitcher && (
+                <button
+                  type="button"
+                  className={`my-btn-primary h-10 px-3 text-sm ${
+                    state.trainingMode === 'sentence-order'
+                      ? 'bg-indigo-500 text-white'
+                      : 'bg-white text-gray-700 dark:bg-gray-700 dark:text-gray-100'
+                  } ${!hasSentenceTraining ? 'cursor-not-allowed opacity-50' : ''}`}
+                  onClick={switchToSentenceMode}
+                  disabled={!hasSentenceTraining}
+                >
+                  句子练习
+                </button>
+              )}
+            </div>
+          )}
           <Tooltip content="跳过该词">
             <button
               className={`${

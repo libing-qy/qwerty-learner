@@ -1,4 +1,4 @@
-import { getSentenceResourceUrl, normalizeSentenceItems } from './sentences'
+import { getSentenceCountByDictId, getSentenceResourceUrl, normalizeSentenceItems } from './sentences'
 import { describe, expect, it } from 'vitest'
 
 describe('sentence resources', () => {
@@ -28,5 +28,10 @@ describe('sentence resources', () => {
 
     expect(items).toHaveLength(1)
     expect(items[0]?.tokens).toEqual(['cancel', 'the', 'plan'])
+  })
+
+  it('returns sentence counts by dictionary id', () => {
+    expect(getSentenceCountByDictId('cet4')).toBe(7)
+    expect(getSentenceCountByDictId('cet6')).toBe(0)
   })
 })

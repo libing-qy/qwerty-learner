@@ -1,13 +1,24 @@
+import useKeySounds from '@/hooks/useKeySounds'
 import { TypingContext, TypingStateActionType } from '@/pages/Typing/store'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 export default function SentenceInput() {
   const typingContext = useContext(TypingContext)
   const [value, setValue] = useState('')
+  const [hasError, setHasError] = useState(false)
+  const [playKeySound, playWrongSound] = useKeySounds()
+  const state = typingContext?.state
+
+  useEffect(() => {
+    if (!state) return
+
+    setValue('')
+    setHasError(false)
+  }, [state?.trainingMode, state?.sentenceData.index])
 
   if (!typingContext) return null
 
-  const { state, dispatch } = typingContext
+  const { dispatch } = typingContext
   const sentence = state.sentenceData.sentences[state.sentenceData.index]
   if (!sentence) return null
 
@@ -26,23 +37,37 @@ export default function SentenceInput() {
       <input
         aria-label="sentence-token-input"
         autoFocus
-        className="w-full rounded-xl border border-indigo-300 px-4 py-3 text-center text-xl outline-none focus:border-indigo-500 dark:bg-gray-800 dark:text-white"
+        className={`w-full rounded-xl border px-4 py-3 text-center text-xl outline-none dark:bg-gray-800 dark:text-white ${
+          hasError ? 'border-red-500 focus:border-red-500' : 'border-indigo-300 focus:border-indigo-500'
+        }`}
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => {
+          setHasError(false)
+          setValue(e.target.value)
+        }}
         onKeyDown={(e) => {
+          if (!e.ctrlKey && !e.metaKey && !e.altKey && (e.key.length === 1 || e.key === 'Backspace')) {
+            playKeySound()
+          }
+
           if (e.key !== ' ') return
           e.preventDefault()
           const token = value.trim()
           if (!token) return
+
           if (token.toLowerCase() === targetToken.toLowerCase()) {
+            setHasError(false)
             dispatch({ type: TypingStateActionType.REPORT_CORRECT_TOKEN, payload: { token } })
             const isLastToken = state.sentenceData.tokenIndex >= sentence.tokens.length - 1
             if (isLastToken) {
               dispatch({ type: TypingStateActionType.NEXT_SENTENCE })
             }
           } else {
+            setHasError(true)
+            playWrongSound()
             dispatch({ type: TypingStateActionType.REPORT_WRONG_TOKEN, payload: { token } })
           }
+
           setValue('')
         }}
       />

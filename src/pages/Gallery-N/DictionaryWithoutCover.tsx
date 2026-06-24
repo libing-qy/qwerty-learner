@@ -4,6 +4,7 @@ import bookCover from '@/assets/book-cover.png'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import useIntersectionObserver from '@/hooks/useIntersectionObserver'
+import { getSentenceCountByDictId } from '@/resources/sentences'
 import { currentDictIdAtom } from '@/store'
 import type { Dictionary } from '@/typings'
 import { calcChapterCount } from '@/utils/calcChapterCount'
@@ -24,6 +25,7 @@ export default function DictionaryComponent({ dictionary }: Props) {
   const dictStats = useDictStats(dictionary.id, isVisible)
   const chapterCount = useMemo(() => calcChapterCount(dictionary.length), [dictionary.length])
   const isSelected = currentDictID === dictionary.id
+  const sentenceCount = useMemo(() => getSentenceCountByDictId(dictionary.id), [dictionary.id])
   const progress = useMemo(
     () => (dictStats ? Math.ceil((dictStats.exercisedChapterCount / chapterCount) * 100) : 0),
     [dictStats, chapterCount],
@@ -64,8 +66,9 @@ export default function DictionaryComponent({ dictionary }: Props) {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-
-            <p className={`mb-0.5 font-bold  ${isSelected ? 'text-white' : 'text-gray-600 dark:text-gray-200'}`}>{dictionary.length} 词</p>
+            <p className={`mb-0.5 font-bold  ${isSelected ? 'text-white' : 'text-gray-600 dark:text-gray-200'}`}>
+              {dictionary.length} 词 · {sentenceCount} 句
+            </p>
             <div className=" flex w-full items-center pt-2">
               {progress > 0 && (
                 <Progress.Root

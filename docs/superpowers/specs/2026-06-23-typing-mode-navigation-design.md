@@ -123,6 +123,7 @@
 在 `TypingStateActionType` 中补充两类导航 action：
 
 1. 模式切换
+
    - `SWITCH_TO_WORD_MODE`
    - 保留已有 `SWITCH_TO_SENTENCE_MODE`
 

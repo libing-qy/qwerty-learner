@@ -4,7 +4,13 @@ const sentenceResourceMap: Record<string, string> = {
   cet4: '/sentences/cet4.json',
 }
 
+const sentenceCountMap: Record<string, number> = {
+  cet4: 7,
+}
+
 export const getSentenceResourceUrl = (dictId: string) => sentenceResourceMap[dictId]
+
+export const getSentenceCountByDictId = (dictId: string) => sentenceCountMap[dictId] ?? 0
 
 export const normalizeSentenceItems = (items: unknown): SentenceItem[] => {
   if (!Array.isArray(items)) return []
