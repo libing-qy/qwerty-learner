@@ -298,7 +298,6 @@ const chinaExam: DictionaryResource[] = [
     url: '/dicts/self-study_English1_00012.json',
     length: 37,
     chapterSize: 37,
-    chapterTitles: ['Speaking Activity'],
     language: 'en',
     languageCategory: 'en',
   },
