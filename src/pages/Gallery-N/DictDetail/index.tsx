@@ -9,6 +9,7 @@ import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { currentChapterAtom, currentDictIdAtom, reviewModeInfoAtom } from '@/store'
 import type { Dictionary } from '@/typings'
+import { getChapterTitle } from '@/utils/getChapterTitle'
 import range from '@/utils/range'
 import { useAtom, useSetAtom } from 'jotai'
 import { useCallback, useMemo, useState } from 'react'
@@ -115,6 +116,7 @@ export default function DictDetail({ dictionary: dict }: { dictionary: Dictionar
                   <Chapter
                     key={`${dict.id}-${index}`}
                     index={index}
+                    title={getChapterTitle(dict.chapterTitles, index, 'zh')}
                     checked={chapter === index}
                     dictID={dict.id}
                     onChange={onChangeChapter}
