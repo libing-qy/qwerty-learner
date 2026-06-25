@@ -10,6 +10,8 @@ export type DictionaryResource = {
   length: number
   language: LanguageType
   languageCategory: LanguageCategoryType
+  chapterSize?: number
+  chapterTitles?: string[]
   //override default pronunciation when not undefined
   defaultPronIndex?: number
 }
@@ -26,6 +28,8 @@ export type Dictionary = {
   languageCategory: LanguageCategoryType
   // calculated in the store
   chapterCount: number
+  chapterSize?: number
+  chapterTitles?: string[]
   //override default pronunciation when not undefined
   defaultPronIndex?: number
 }

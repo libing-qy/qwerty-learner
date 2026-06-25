@@ -290,6 +290,19 @@ const chinaExam: DictionaryResource[] = [
     languageCategory: 'en',
   },
   {
+    id: 'self-study_English1_00012',
+    name: '自考英语一教材词汇 00012',
+    description: '00012 自考英语一教材 New Words + Phrases and Expressions',
+    category: '中国考试',
+    tags: ['自考英语一'],
+    url: '/dicts/self-study_English1_00012.json',
+    length: 37,
+    chapterSize: 37,
+    chapterTitles: ['Speaking Activity'],
+    language: 'en',
+    languageCategory: 'en',
+  },
+  {
     id: 'coca_20000',
     name: 'COCA20000词',
     description: 'COCA20000词',
@@ -4191,7 +4204,7 @@ export const dictionaryResources: DictionaryResource[] = [
 
 export const dictionaries: Dictionary[] = dictionaryResources.map((resource) => ({
   ...resource,
-  chapterCount: calcChapterCount(resource.length),
+  chapterCount: calcChapterCount(resource.length, resource.chapterSize),
 }))
 
 /**
