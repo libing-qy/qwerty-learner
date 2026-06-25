@@ -19,6 +19,16 @@ export default function ViewSetting() {
     [setFontsizeConfig],
   )
 
+  const onChangeSentenceForeignFontSize = useCallback(
+    (value: [number]) => {
+      setFontsizeConfig((prev) => ({
+        ...prev,
+        sentenceForeignFont: value[0],
+      }))
+    },
+    [setFontsizeConfig],
+  )
+
   const onChangeTranslateFontSize = useCallback(
     (value: [number]) => {
       setFontsizeConfig((prev) => ({
@@ -40,7 +50,7 @@ export default function ViewSetting() {
           <div className={styles.section}>
             <span className={styles.sectionLabel}>字体设置</span>
             <div className={styles.block}>
-              <span className={styles.blockLabel}>外语字体</span>
+              <span className={styles.blockLabel}>单词/提示字体</span>
               <div className="flex h-5 w-full items-center justify-between">
                 <Slider.Root
                   value={[fontSizeConfig.foreignFont]}
@@ -56,6 +66,26 @@ export default function ViewSetting() {
                   <Slider.Thumb />
                 </Slider.Root>
                 <span className="ml-4 w-10 text-xs font-normal text-gray-600">{fontSizeConfig.foreignFont}px</span>
+              </div>
+            </div>
+
+            <div className={styles.block}>
+              <span className={styles.blockLabel}>句子输入字体</span>
+              <div className="flex h-5 w-full items-center justify-between">
+                <Slider.Root
+                  value={[fontSizeConfig.sentenceForeignFont]}
+                  min={20}
+                  max={96}
+                  step={4}
+                  className="slider"
+                  onValueChange={onChangeSentenceForeignFontSize}
+                >
+                  <Slider.Track>
+                    <Slider.Range />
+                  </Slider.Track>
+                  <Slider.Thumb />
+                </Slider.Root>
+                <span className="ml-4 w-10 text-xs font-normal text-gray-600">{fontSizeConfig.sentenceForeignFont}px</span>
               </div>
             </div>
 

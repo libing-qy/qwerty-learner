@@ -1,7 +1,10 @@
+import { fontSizeConfigAtom } from '@/store'
 import shuffle from '@/utils/shuffle'
+import { useAtomValue } from 'jotai'
 import { useRef } from 'react'
 
 export default function ScrambledTokens({ tokens, sentenceId }: { tokens: string[]; sentenceId: string }) {
+  const fontSizeConfig = useAtomValue(fontSizeConfigAtom)
   const previousSentenceIdRef = useRef<string | undefined>(undefined)
   const scrambledRef = useRef<string[]>([])
 
@@ -17,7 +20,11 @@ export default function ScrambledTokens({ tokens, sentenceId }: { tokens: string
       {scrambled.map((token, index) => (
         <span
           key={`${token}-${index}`}
-          className="rounded-full bg-indigo-100 px-4 py-2 text-lg font-medium text-indigo-700 dark:bg-gray-700 dark:text-indigo-200"
+          className="rounded-full bg-indigo-100 px-4 py-2 font-medium text-indigo-700 dark:bg-gray-700 dark:text-indigo-200"
+          style={{
+            fontSize: fontSizeConfig.sentenceForeignFont.toString() + 'px',
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+          }}
         >
           {token}
         </span>

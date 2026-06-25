@@ -2,7 +2,7 @@ import { currentChapterAtom, currentDictIdAtom, randomConfigAtom, reviewModeInfo
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { Provider, createStore } from 'jotai'
 import type { ReactNode } from 'react'
-import { forwardRef } from 'react'
+import { forwardRef, useEffect } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, expect, it, vi } from 'vitest'
 
@@ -12,6 +12,7 @@ type ChildrenProps = {
 
 const MockWordPronunciationIcon = forwardRef<HTMLDivElement>(() => null)
 MockWordPronunciationIcon.displayName = 'MockWordPronunciationIcon'
+const replaySentencePronunciation = vi.fn()
 
 let mockWords = [
   { name: 'a', trans: ['字母 a'], usphone: '', ukphone: '', index: 0 },
@@ -45,7 +46,30 @@ vi.mock('./hooks/useSentenceList', () => ({
 }))
 
 vi.mock('react-hotkeys-hook', () => ({
-  useHotkeys: () => undefined,
+  useHotkeys: (shortcut: string, callback: (event: KeyboardEvent) => void, depsOrOptions?: unknown, maybeOptions?: unknown) => {
+    const options = Array.isArray(depsOrOptions)
+      ? (maybeOptions as { preventDefault?: boolean } | undefined)
+      : (depsOrOptions as { preventDefault?: boolean } | undefined)
+
+    useEffect(() => {
+      if (shortcut.toLowerCase() !== 'ctrl+j') return
+
+      const handler = (event: KeyboardEvent) => {
+        if (event.key.toLowerCase() !== 'j' || !event.ctrlKey) return
+
+        if (options?.preventDefault) {
+          event.preventDefault()
+        }
+
+        callback(event)
+      }
+
+      window.addEventListener('keydown', handler)
+      return () => {
+        window.removeEventListener('keydown', handler)
+      }
+    }, [callback, options?.preventDefault, shortcut])
+  },
 }))
 
 vi.mock('@/components/DonateCard', () => ({ DonateCard: () => null }))
@@ -65,8 +89,21 @@ vi.mock('@/components/WordPronunciationIcon', () => ({
 vi.mock('@/hooks/useKeySounds', () => ({
   default: () => [vi.fn(), vi.fn(), vi.fn()],
 }))
+vi.mock('@/pages/Typing/hooks/useSentencePronunciation', () => ({
+  default: () => ({
+    replay: replaySentencePronunciation,
+    stop: vi.fn(),
+    isPlaying: false,
+  }),
+}))
 vi.mock('./hooks/useConfetti', () => ({ useConfetti: () => undefined }))
-vi.mock('@/hooks/usePronunciation', () => ({ usePrefetchPronunciationSound: () => undefined }))
+vi.mock('@/hooks/usePronunciation', async () => {
+  const actual = await vi.importActual('@/hooks/usePronunciation')
+  return {
+    ...actual,
+    usePrefetchPronunciationSound: () => undefined,
+  }
+})
 vi.mock('@/utils/db', () => ({
   useSaveChapterRecord: () => vi.fn(),
   useSaveWordRecord: () => vi.fn(),
@@ -82,6 +119,7 @@ vi.mock('@/utils', async () => {
 })
 
 beforeEach(() => {
+  replaySentencePronunciation.mockReset()
   mockWords = [
     { name: 'a', trans: ['字母 a'], usphone: '', ukphone: '', index: 0 },
     { name: 'b', trans: ['字母 b'], usphone: '', ukphone: '', index: 1 },
@@ -132,4 +170,42 @@ it('switches to sentence mode after typing through to the final word', async () 
   })
 
   expect(screen.getByRole('textbox', { name: 'sentence-token-input' })).toBeInTheDocument()
+})
+
+it('replays the current sentence with Ctrl + J in sentence mode', async () => {
+  const { default: App } = await import('./index')
+  const store = createStore()
+  store.set(currentDictIdAtom, 'cet4')
+  store.set(currentChapterAtom, 0)
+  store.set(randomConfigAtom, { isOpen: false })
+  store.set(reviewModeInfoAtom, { isReviewMode: false, reviewRecord: undefined })
+
+  render(
+    <MemoryRouter>
+      <Provider store={store}>
+        <App />
+      </Provider>
+    </MemoryRouter>,
+  )
+
+  await waitFor(() => {
+    expect(screen.getByText('a')).toBeInTheDocument()
+  })
+
+  fireEvent.keyDown(window, { key: 'a' })
+  fireEvent.keyDown(window, { key: 'a' })
+
+  await waitFor(() => {
+    expect(screen.getByText('b')).toBeInTheDocument()
+  })
+
+  fireEvent.keyDown(window, { key: 'b' })
+
+  await waitFor(() => {
+    expect(screen.getByRole('textbox', { name: 'sentence-token-input' })).toBeInTheDocument()
+  })
+
+  fireEvent.keyDown(window, { key: 'j', ctrlKey: true })
+
+  expect(replaySentencePronunciation).toHaveBeenCalledTimes(1)
 })

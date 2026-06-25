@@ -9,9 +9,8 @@ export default function WordCard({ word, isActive, onClick }: { word: Word; isAc
   const wordPronunciationIconRef = useRef<WordPronunciationIconRef>(null)
   const currentLanguage = useAtomValue(currentDictInfoAtom).language
 
-  const handlePlay = useCallback(() => {
+  const handleJump = useCallback(() => {
     onClick?.()
-    wordPronunciationIconRef.current?.play()
   }, [onClick])
 
   return (
@@ -20,7 +19,7 @@ export default function WordCard({ word, isActive, onClick }: { word: Word; isAc
         isActive ? 'bg-indigo-50 dark:bg-indigo-800 dark:bg-opacity-20' : 'bg-white dark:bg-gray-700 dark:bg-opacity-20'
       }   `}
       key={word.name}
-      onClick={handlePlay}
+      onClick={handleJump}
     >
       <div className="flex-1">
         <p className="select-all font-mono text-xl font-normal leading-6 dark:text-gray-50">
@@ -28,7 +27,9 @@ export default function WordCard({ word, isActive, onClick }: { word: Word; isAc
         </p>
         <div className="mt-2 max-w-sm font-sans text-sm text-gray-400">{word.trans.join('；')}</div>
       </div>
-      <WordPronunciationIcon word={word} lang={currentLanguage} className="h-8 w-8" ref={wordPronunciationIconRef} />
+      <div onClick={(event) => event.stopPropagation()}>
+        <WordPronunciationIcon word={word} lang={currentLanguage} className="h-8 w-8" ref={wordPronunciationIconRef} />
+      </div>
     </div>
   )
 }

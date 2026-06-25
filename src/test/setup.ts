@@ -28,3 +28,35 @@ if (!window.matchMedia) {
     }),
   })
 }
+
+if (!window.speechSynthesis) {
+  Object.defineProperty(window, 'speechSynthesis', {
+    writable: true,
+    value: {
+      speaking: false,
+      speak: () => undefined,
+      cancel: () => undefined,
+    },
+  })
+}
+
+if (typeof globalThis.SpeechSynthesisUtterance === 'undefined') {
+  Object.defineProperty(globalThis, 'SpeechSynthesisUtterance', {
+    writable: true,
+    value: class {
+      text: string
+
+      constructor(text: string) {
+        this.text = text
+      }
+
+      addEventListener() {
+        return undefined
+      }
+
+      removeEventListener() {
+        return undefined
+      }
+    },
+  })
+}

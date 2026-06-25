@@ -14,6 +14,10 @@ export type UseSpeechResult = {
    * Whether currently speaking
    */
   speaking: boolean
+  /**
+   * Whether speech synthesis is ready to speak the current text.
+   */
+  ready: boolean
 }
 
 /**
@@ -75,6 +79,7 @@ export default function useSpeech(text: string, option?: Partial<SpeechSynthesis
     const synth = window.speechSynthesis
     if (speaking) {
       synth.cancel()
+      setSpeaking(false)
     }
   }, [speaking])
 
@@ -82,5 +87,6 @@ export default function useSpeech(text: string, option?: Partial<SpeechSynthesis
     speak,
     cancel,
     speaking,
+    ready: utterance !== null,
   }
 }

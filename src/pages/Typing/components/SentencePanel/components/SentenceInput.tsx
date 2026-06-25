@@ -1,9 +1,12 @@
 import useKeySounds from '@/hooks/useKeySounds'
 import { TypingContext, TypingStateActionType } from '@/pages/Typing/store'
+import { fontSizeConfigAtom } from '@/store'
+import { useAtomValue } from 'jotai'
 import { useContext, useEffect, useState } from 'react'
 
 export default function SentenceInput() {
   const typingContext = useContext(TypingContext)
+  const fontSizeConfig = useAtomValue(fontSizeConfigAtom)
   const [value, setValue] = useState('')
   const [hasError, setHasError] = useState(false)
   const [playKeySound, playWrongSound] = useKeySounds()
@@ -49,9 +52,13 @@ export default function SentenceInput() {
 
   return (
     <div className="flex w-full max-w-3xl flex-col items-center gap-4">
-      <div className="flex flex-wrap justify-center gap-3 text-xl text-gray-700 dark:text-gray-200">
+      <div className="flex flex-wrap justify-center gap-3 text-gray-700 dark:text-gray-200">
         {completedTokens.map((token, index) => (
-          <span key={`${token}-${index}`} className="rounded bg-green-100 px-3 py-2 text-xl font-medium dark:bg-green-900">
+          <span
+            key={`${token}-${index}`}
+            className="rounded bg-green-100 px-3 py-2 font-medium dark:bg-green-900"
+            style={{ fontSize: fontSizeConfig.sentenceForeignFont.toString() + 'px' }}
+          >
             {token}
           </span>
         ))}
@@ -62,6 +69,7 @@ export default function SentenceInput() {
         className={`w-full rounded-xl border px-4 py-3 text-center text-2xl outline-none dark:bg-gray-800 dark:text-white ${
           hasError ? 'border-red-500 focus:border-red-500' : 'border-indigo-300 focus:border-indigo-500'
         }`}
+        style={{ fontSize: fontSizeConfig.sentenceForeignFont.toString() + 'px' }}
         value={value}
         onChange={(e) => {
           setHasError(false)

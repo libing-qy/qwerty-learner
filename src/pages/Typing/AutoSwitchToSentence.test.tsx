@@ -65,7 +65,13 @@ vi.mock('./components/PrevAndNextWord', () => ({ default: () => null }))
 vi.mock('./components/PrevAndNextSentence', () => ({ default: () => null }))
 vi.mock('./components/Progress', () => ({ default: () => null }))
 vi.mock('./hooks/useConfetti', () => ({ useConfetti: () => undefined }))
-vi.mock('@/hooks/usePronunciation', () => ({ usePrefetchPronunciationSound: () => undefined }))
+vi.mock('@/hooks/usePronunciation', async () => {
+  const actual = await vi.importActual('@/hooks/usePronunciation')
+  return {
+    ...actual,
+    usePrefetchPronunciationSound: () => undefined,
+  }
+})
 vi.mock('@/utils/db', () => ({
   useSaveChapterRecord: () => vi.fn(),
   useSaveWordRecord: () => vi.fn(),

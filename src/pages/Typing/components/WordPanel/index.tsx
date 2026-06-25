@@ -11,7 +11,7 @@ import { usePrefetchPronunciationSound } from '@/hooks/usePronunciation'
 import { isReviewModeAtom, isShowPrevAndNextWordAtom, loopWordConfigAtom, phoneticConfigAtom, reviewModeInfoAtom } from '@/store'
 import type { Word } from '@/typings'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { useCallback, useContext, useMemo, useState } from 'react'
+import { useCallback, useContext, useMemo, useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 
 export default function WordPanel() {
@@ -21,6 +21,7 @@ export default function WordPanel() {
   const isShowPrevAndNextWord = useAtomValue(isShowPrevAndNextWordAtom)
   const [wordComponentKey, setWordComponentKey] = useState(0)
   const [currentWordExerciseCount, setCurrentWordExerciseCount] = useState(0)
+  const sentenceReplayRef = useRef<(() => void) | null>(null)
   const { times: loopWordTimes } = useAtomValue(loopWordConfigAtom)
   const hasSentenceTraining = state.sentenceData.sentences.length > 0
   const currentWord = state.chapterData.words[state.chapterData.index]
@@ -141,6 +142,19 @@ export default function WordPanel() {
     },
     { preventDefault: true },
   )
+
+  useHotkeys(
+    'ctrl+j',
+    (e) => {
+      if (state.trainingMode !== 'sentence-order' || !state.isTyping) return
+
+      e.preventDefault()
+      sentenceReplayRef.current?.()
+    },
+    [state.isTyping, state.trainingMode],
+    { enableOnFormTags: true, preventDefault: true },
+  )
+
   const [isShowTranslation, setIsHoveringTranslation] = useState(false)
 
   const handleShowTranslation = useCallback((checked: boolean) => {
@@ -180,7 +194,7 @@ export default function WordPanel() {
             </>
           )}
         </div>
-        <SentencePanel />
+        <SentencePanel setReplayHandler={(handler) => (sentenceReplayRef.current = handler)} />
         <Progress className={`mb-10 mt-auto ${state.isTyping ? 'opacity-100' : 'opacity-0'}`} />
       </div>
     )
