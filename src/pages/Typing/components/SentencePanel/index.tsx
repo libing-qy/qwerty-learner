@@ -16,7 +16,7 @@ export default function SentencePanel() {
   return (
     <div className="container flex h-full w-full flex-col items-center justify-center">
       <SentencePrompt />
-      <ScrambledTokens tokens={sentence.tokens} />
+      <ScrambledTokens sentenceId={sentence.id} tokens={sentence.tokens} />
       <SentenceInput />
     </div>
   )

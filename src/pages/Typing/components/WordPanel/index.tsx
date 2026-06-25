@@ -1,5 +1,6 @@
 import { TypingContext, TypingStateActionType } from '../../store'
 import type { TypingState } from '../../store/type'
+import PrevAndNextSentence from '../PrevAndNextSentence'
 import PrevAndNextWord from '../PrevAndNextWord'
 import Progress from '../Progress'
 import SentencePanel from '../SentencePanel'
@@ -54,36 +55,40 @@ export default function WordPanel() {
   )
 
   const onFinish = useCallback(() => {
-    if (state.chapterData.index < state.chapterData.words.length - 1 || currentWordExerciseCount < loopWordTimes - 1) {
-      // 用户完成当前单词
-      if (currentWordExerciseCount < loopWordTimes - 1) {
-        setCurrentWordExerciseCount((old) => old + 1)
-        dispatch({ type: TypingStateActionType.LOOP_CURRENT_WORD })
-        reloadCurrentWordComponent()
-      } else {
-        setCurrentWordExerciseCount(0)
-        if (isReviewMode) {
-          dispatch({
-            type: TypingStateActionType.NEXT_WORD,
-            payload: {
-              updateReviewRecord,
-            },
-          })
-        } else {
-          dispatch({ type: TypingStateActionType.NEXT_WORD })
-        }
-      }
-    } else {
-      if (hasSentenceTraining) {
-        dispatch({ type: TypingStateActionType.SWITCH_TO_SENTENCE_MODE })
-        return
-      }
+    const isLastWord = state.chapterData.index >= state.chapterData.words.length - 1
 
-      // 用户完成当前章节
-      dispatch({ type: TypingStateActionType.FINISH_CHAPTER })
+    if (currentWordExerciseCount < loopWordTimes - 1) {
+      setCurrentWordExerciseCount((old) => old + 1)
+      dispatch({ type: TypingStateActionType.LOOP_CURRENT_WORD })
+      reloadCurrentWordComponent()
+      return
+    }
+
+    setCurrentWordExerciseCount(0)
+
+    if (!isLastWord) {
       if (isReviewMode) {
-        setReviewModeInfo((old) => ({ ...old, reviewRecord: old.reviewRecord ? { ...old.reviewRecord, isFinished: true } : undefined }))
+        dispatch({
+          type: TypingStateActionType.NEXT_WORD,
+          payload: {
+            updateReviewRecord,
+          },
+        })
+      } else {
+        dispatch({ type: TypingStateActionType.NEXT_WORD })
       }
+      return
+    }
+
+    if (hasSentenceTraining) {
+      dispatch({ type: TypingStateActionType.NEXT_WORD })
+      return
+    }
+
+    // 用户完成当前章节
+    dispatch({ type: TypingStateActionType.FINISH_CHAPTER })
+    if (isReviewMode) {
+      setReviewModeInfo((old) => ({ ...old, reviewRecord: old.reviewRecord ? { ...old.reviewRecord, isFinished: true } : undefined }))
     }
   }, [
     state.chapterData.index,
@@ -100,6 +105,14 @@ export default function WordPanel() {
 
   const onSkipWord = useCallback(
     (type: 'prev' | 'next') => {
+      if (state.trainingMode === 'sentence-order') {
+        const targetIndex = state.sentenceData.index + (type === 'prev' ? -1 : 1)
+        if (targetIndex < 0 || targetIndex >= state.sentenceData.sentences.length) return
+
+        dispatch({ type: TypingStateActionType.SKIP_2_SENTENCE_INDEX, newIndex: targetIndex })
+        return
+      }
+
       if (type === 'prev') {
         dispatch({ type: TypingStateActionType.SKIP_2_WORD_INDEX, newIndex: prevIndex })
       }
@@ -108,7 +121,7 @@ export default function WordPanel() {
         dispatch({ type: TypingStateActionType.SKIP_2_WORD_INDEX, newIndex: nextIndex })
       }
     },
-    [dispatch, prevIndex, nextIndex],
+    [dispatch, nextIndex, prevIndex, state.sentenceData.index, state.sentenceData.sentences.length, state.trainingMode],
   )
 
   useHotkeys(
@@ -159,6 +172,14 @@ export default function WordPanel() {
   if (state.trainingMode === 'sentence-order') {
     return (
       <div className="container flex h-full w-full flex-col items-center justify-center">
+        <div className="container flex h-24 w-full shrink-0 grow-0 justify-between px-12 pt-10">
+          {isShowPrevAndNextWord && state.isTyping && (
+            <>
+              <PrevAndNextSentence type="prev" />
+              <PrevAndNextSentence type="next" />
+            </>
+          )}
+        </div>
         <SentencePanel />
         <Progress className={`mb-10 mt-auto ${state.isTyping ? 'opacity-100' : 'opacity-0'}`} />
       </div>

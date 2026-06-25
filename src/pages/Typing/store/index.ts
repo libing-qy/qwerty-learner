@@ -252,6 +252,15 @@ export const typingReducer = (state: TypingState, action: TypingStateAction) => 
       break
     }
     case TypingStateActionType.NEXT_WORD: {
+      const isLastWord = state.chapterData.index >= state.chapterData.words.length - 1
+
+      if (isLastWord && state.sentenceData.sentences.length > 0) {
+        state.chapterData.wordCount += 1
+        state.isShowSkip = false
+        switchToSentenceMode(state)
+        break
+      }
+
       state.chapterData.index += 1
       state.chapterData.wordCount += 1
       state.isShowSkip = false

@@ -5,13 +5,14 @@ import type { Word } from '@/typings'
 import { useAtomValue } from 'jotai'
 import { useCallback, useRef } from 'react'
 
-export default function WordCard({ word, isActive }: { word: Word; isActive: boolean }) {
+export default function WordCard({ word, isActive, onClick }: { word: Word; isActive: boolean; onClick?: () => void }) {
   const wordPronunciationIconRef = useRef<WordPronunciationIconRef>(null)
   const currentLanguage = useAtomValue(currentDictInfoAtom).language
 
   const handlePlay = useCallback(() => {
+    onClick?.()
     wordPronunciationIconRef.current?.play()
-  }, [])
+  }, [onClick])
 
   return (
     <div

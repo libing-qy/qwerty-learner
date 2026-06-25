@@ -1,4 +1,5 @@
 import { TypingContext, TypingStateActionType } from '../../store'
+import SentenceCard from './SentenceCard'
 import WordCard from './WordCard'
 import Drawer from '@/components/Drawer'
 import Tooltip from '@/components/Tooltip'
@@ -31,6 +32,16 @@ export default function WordList() {
     setIsOpen(false)
   }
 
+  function jumpToWord(index: number) {
+    dispatch({ type: TypingStateActionType.SKIP_2_WORD_INDEX, newIndex: index })
+    closeModal()
+  }
+
+  function jumpToSentence(index: number) {
+    dispatch({ type: TypingStateActionType.SKIP_2_SENTENCE_INDEX, newIndex: index })
+    closeModal()
+  }
+
   function openModal() {
     setIsOpen(true)
     dispatch({ type: TypingStateActionType.SET_IS_TYPING, payload: false })
@@ -56,9 +67,27 @@ export default function WordList() {
         <ScrollArea.Root className="flex-1 select-none overflow-y-auto ">
           <ScrollArea.Viewport className="h-full w-full px-3">
             <div className="flex h-full w-full flex-col gap-1">
-              {state.chapterData.words?.map((word, index) => {
-                return <WordCard word={word} key={`${word.name}_${index}`} isActive={state.chapterData.index === index} />
-              })}
+              {state.trainingMode === 'sentence-order' && state.sentenceData.sentences.length > 0
+                ? state.sentenceData.sentences.map((sentence, index) => {
+                    return (
+                      <SentenceCard
+                        sentence={sentence}
+                        key={sentence.id}
+                        isActive={state.sentenceData.index === index}
+                        onClick={() => jumpToSentence(index)}
+                      />
+                    )
+                  })
+                : state.chapterData.words?.map((word, index) => {
+                    return (
+                      <WordCard
+                        word={word}
+                        key={`${word.name}_${index}`}
+                        isActive={state.chapterData.index === index}
+                        onClick={() => jumpToWord(index)}
+                      />
+                    )
+                  })}
             </div>
           </ScrollArea.Viewport>
           <ScrollArea.Scrollbar className="flex touch-none select-none bg-transparent " orientation="vertical"></ScrollArea.Scrollbar>

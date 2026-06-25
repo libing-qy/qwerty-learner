@@ -355,4 +355,36 @@ describe('typingReducer sentence mode transition', () => {
     expect(nextState.trainingMode).toBe('sentence-order')
     expect(nextState.isFinished).toBe(false)
   })
+
+  it('switches to sentence mode when the final word completion path dispatches NEXT_WORD', () => {
+    const state = structuredClone(initialState)
+    state.trainingMode = 'word'
+    state.isTyping = true
+    state.chapterData.words = [
+      { name: 'cancel', trans: ['取消'], usphone: '', ukphone: '', index: 0 },
+      { name: 'plan', trans: ['计划'], usphone: '', ukphone: '', index: 1 },
+    ]
+    state.chapterData.index = 1
+    state.sentenceData.sentences = [
+      {
+        id: 'cet4-0-0',
+        text: 'cancel the plan',
+        tokens: ['cancel', 'the', 'plan'],
+        trans: '取消计划',
+        chapter: 0,
+        sourceDictId: 'cet4',
+      },
+    ]
+
+    const nextState = produce(state, (draft) => {
+      typingReducer(draft, { type: TypingStateActionType.NEXT_WORD })
+    })
+
+    expect(nextState.trainingMode).toBe('sentence-order')
+    expect(nextState.isFinished).toBe(false)
+    expect(nextState.chapterData.index).toBe(1)
+    expect(nextState.chapterData.wordCount).toBe(1)
+    expect(nextState.sentenceData.index).toBe(0)
+    expect(nextState.sentenceData.tokenIndex).toBe(0)
+  })
 })

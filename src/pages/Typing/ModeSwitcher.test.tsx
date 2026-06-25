@@ -2,8 +2,13 @@ import { TypingStateActionType, initialState } from './store'
 import { currentChapterAtom, currentDictIdAtom, randomConfigAtom, reviewModeInfoAtom } from '@/store'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { Provider, createStore } from 'jotai'
+import type { ReactNode } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+type ChildrenProps = {
+  children: ReactNode
+}
 
 const mockDispatch = vi.fn()
 let mockState = structuredClone(initialState)
@@ -43,9 +48,9 @@ vi.mock('use-immer', () => ({
 }))
 
 vi.mock('@/components/DonateCard', () => ({ DonateCard: () => null }))
-vi.mock('@/components/Header', () => ({ default: ({ children }: any) => <div>{children}</div> }))
-vi.mock('../../components/Layout', () => ({ default: ({ children }: any) => <div>{children}</div> }))
-vi.mock('@/components/Tooltip', () => ({ default: ({ children }: any) => <>{children}</> }))
+vi.mock('@/components/Header', () => ({ default: ({ children }: ChildrenProps) => <div>{children}</div> }))
+vi.mock('../../components/Layout', () => ({ default: ({ children }: ChildrenProps) => <div>{children}</div> }))
+vi.mock('@/components/Tooltip', () => ({ default: ({ children }: ChildrenProps) => <>{children}</> }))
 vi.mock('./components/DictChapterButton', () => ({ DictChapterButton: () => <div>DictChapterButton</div> }))
 vi.mock('./components/PronunciationSwitcher', () => ({ default: () => <div>PronunciationSwitcher</div> }))
 vi.mock('./components/ResultScreen', () => ({ default: () => null }))
