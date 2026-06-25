@@ -292,7 +292,7 @@ const chinaExam: DictionaryResource[] = [
   {
     id: 'self-study_English1_00012',
     name: '自考英语一教材词汇 00012',
-    description: '00012 自考英语一教材 New Words + Phrases and Expressions',
+    description: '00012 自考英语一教材 Unit 1',
     category: '中国考试',
     tags: ['自考英语一'],
     url: '/dicts/self-study_English1_00012.json',

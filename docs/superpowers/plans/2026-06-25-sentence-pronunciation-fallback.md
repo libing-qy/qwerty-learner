@@ -32,6 +32,7 @@
 ### Task 1: Build the sentence pronunciation hook
 
 **Files:**
+
 - Create: `src/pages/Typing/hooks/useSentencePronunciation.test.ts`
 - Create: `src/pages/Typing/hooks/useSentencePronunciation.ts`
 
@@ -69,10 +70,9 @@ describe('useSentencePronunciation', () => {
   })
 
   it('auto plays with remote audio when a new sentence id is entered', () => {
-    const { result, rerender } = renderHook(
-      ({ sentenceId, text }) => useSentencePronunciation({ sentenceId, text, autoPlay: true }),
-      { initialProps: { sentenceId: 's1', text: 'cancel the plan' } },
-    )
+    const { result, rerender } = renderHook(({ sentenceId, text }) => useSentencePronunciation({ sentenceId, text, autoPlay: true }), {
+      initialProps: { sentenceId: 's1', text: 'cancel the plan' },
+    })
 
     expect(mockPlay).toHaveBeenCalledTimes(1)
     expect(mockSpeak).not.toHaveBeenCalled()
@@ -208,6 +208,7 @@ git commit -m "feat: add sentence pronunciation fallback hook"
 ### Task 2: Add sentence replay UI and auto-play wiring
 
 **Files:**
+
 - Create: `src/pages/Typing/components/SentencePanel/components/SentencePronunciationButton.tsx`
 - Modify: `src/pages/Typing/components/SentencePanel/index.tsx`
 - Modify: `src/pages/Typing/components/SentencePanel/index.test.tsx`
@@ -290,7 +291,12 @@ import { SoundIcon } from '@/components/WordPronunciationIcon/SoundIcon'
 export default function SentencePronunciationButton({ isPlaying, onReplay }: { isPlaying: boolean; onReplay: () => void }) {
   return (
     <Tooltip content="重播句子发音（Ctrl + J）">
-      <button type="button" aria-label="重播句子发音" className="absolute -right-12 top-1/2 h-9 w-9 -translate-y-1/2 transform" onClick={onReplay}>
+      <button
+        type="button"
+        aria-label="重播句子发音"
+        className="absolute -right-12 top-1/2 h-9 w-9 -translate-y-1/2 transform"
+        onClick={onReplay}
+      >
         <SoundIcon animated={isPlaying} className="h-full w-full cursor-pointer text-gray-600" />
       </button>
     </Tooltip>
@@ -300,11 +306,11 @@ export default function SentencePronunciationButton({ isPlaying, onReplay }: { i
 
 ```tsx
 // src/pages/Typing/components/SentencePanel/index.tsx
+import { useSentencePronunciation } from '../../hooks/useSentencePronunciation'
 import ScrambledTokens from './components/ScrambledTokens'
 import SentenceInput from './components/SentenceInput'
-import SentencePronunciationButton from './components/SentencePronunciationButton'
 import SentencePrompt from './components/SentencePrompt'
-import { useSentencePronunciation } from '../../hooks/useSentencePronunciation'
+import SentencePronunciationButton from './components/SentencePronunciationButton'
 import { TypingContext } from '@/pages/Typing/store'
 import { useContext } from 'react'
 
@@ -351,6 +357,7 @@ git commit -m "feat: add sentence pronunciation replay UI"
 ### Task 3: Add sentence replay hotkey and sentence-mode integration coverage
 
 **Files:**
+
 - Modify: `src/pages/Typing/components/WordPanel/index.tsx`
 - Modify: `src/pages/Typing/AutoSwitchToSentence.integration.test.tsx`
 - Modify: `src/test/setup.ts`
@@ -455,6 +462,7 @@ git commit -m "feat: add sentence pronunciation hotkey"
 ### Task 4: Full verification
 
 **Files:**
+
 - Verify only
 
 - [ ] **Step 1: Run the full Typing test suite**
